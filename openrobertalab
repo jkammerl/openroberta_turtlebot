@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+import atexit
+import logging
+from argparse import ArgumentParser
+
+from gi.repository import GObject
+from roberta.lab import Connector
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('roberta')
+
+GObject.threads_init()
+
+def cleanup():
+    logger.info('--- done ---')
+    logging.shutdown()
+
+
+def main():
+    logger.info('--- starting ---')
+
+    atexit.register(cleanup)
+    
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--server", dest="server",
+                    help="OpenRoberta server", metavar="SERVER_HOSTNAME", required=True)
+    args = parser.parse_args()
+
+    connector = Connector("http://" + args.server + ":1999")
+
+    connector.run()
+    
+    loop = GObject.MainLoop()
+
+    logger.debug('loop running')
+    loop.run()
+
+
+if __name__ == "__main__":
+    main()
